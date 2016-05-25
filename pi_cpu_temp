@@ -1,0 +1,75 @@
+#!/usr/bin/perl -w
+
+=head1 NAME
+
+Pi CPU Temperature - Get Raspberry Pi CPU Temperature.
+
+=head1 APPLICABLE SYSTEMS
+
+Raspberry Pi onyl.
+
+=head1 AUTHOR
+
+Create by HimaJyun( http://jyn.jp/ )
+
+=head1 LICENSE
+
+The MIT License (MIT)
+
+Copyright (c) 2016 HimaJyun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ the Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf
+
+=cut
+
+use strict;
+
+if ( $ARGV[0] eq 'autoconf' ) {
+	if ( -f '/sys/class/thermal/thermal_zone0/temp' ) {
+		print "yes\n";
+	} else {
+		print "no(/sys/class/thermal/thermal_zone0/temp not found.)\n";
+	}
+	exit 0;
+}
+
+if ( $ARGV[0] eq 'config' ) {
+print << 'EOL';
+graph_title Pi CPU Temperature
+graph_args --base 1000 -l -0
+graph_vlabel Degress Celsius
+graph_category sensors
+
+core.label Core
+core.info Pi CPU Temperature.
+core.type GAUGE
+
+EOL
+exit 0;
+}
+
+open (my $SOURCE, '<', '/sys/class/thermal/thermal_zone0/temp');
+my $temp = <$SOURCE>;
+close ($SOURCE);
+
+print "core.value " . sprintf("%.2f", ($temp/1000)) . "\n";
